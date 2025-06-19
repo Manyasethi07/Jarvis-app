@@ -1,20 +1,20 @@
 import streamlit as st
-import comtypes
-comtypes.CoInitialize()
-import pyttsx3
+from gtts import gTTS
+import os
 import datetime
 import wikipedia
 import webbrowser
-import os
 import pyjokes
 import psutil
 
-# Initialize text-to-speech engine
-engine = pyttsx3.init()
-
+# Text-to-speech using gTTS
 def speak(text):
-    engine.say(text)
-    engine.runAndWait()
+    tts = gTTS(text=text, lang='en')
+    tts.save("temp_audio.mp3")
+    audio_file = open("temp_audio.mp3", "rb")
+    st.audio(audio_file.read(), format='audio/mp3')
+    audio_file.close()
+    os.remove("temp_audio.mp3")
 
 # Feature functions
 def get_time():
@@ -47,7 +47,7 @@ def get_joke():
 def search_wikipedia(query):
     try:
         return wikipedia.summary(query, sentences=2)
-    except Exception as e:
+    except Exception:
         return "Couldn't find information on that."
 
 # Streamlit UI
@@ -92,5 +92,6 @@ if st.button("Process Command"):
         response = "Sorry, I didn't understand that command."
 
     st.success(response)
+
     if st.checkbox("🔊 Speak it out"):
         speak(response)
